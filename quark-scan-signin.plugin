@@ -1,19 +1,15 @@
 #!name = 夸克扫描王自动签到
-#!desc = 抓取夸克扫描王 Cookie/凭证并每日自动签到；首次使用请打开 App 进一次签到页；Cookie 失效后重新进一次即可
+#!desc = 配合 iOS 快捷指令每日自动打开 App；App 原生自动签到，Loon 拦截真实响应并推送结果通知（不伪造任何请求）
 #!date = 2026-11-13
 #!author = Scripting Agent
 
 [Argument]
-quark_signin = switch,true,tag=夸克签到任务
-quark_cookie = switch,true,tag=夸克Cookie抓取
-quark_time = input,"35 9 * * *",tag=签到定时
+quark_signin = switch,true,tag=签到结果播报
 
 [Script]
-request if ${url} ~= /(scan-order|drive-m)\.quark\.cn/i then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-cookie.js") with enable=${quark_cookie}, tag="夸克Cookie", timeout=60, requires_body=false
+response if ${url} ~= /pDChohbxo82nCoIn/i then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-notify.js") with enable=${quark_signin}, tag="夸克签到结果", timeout=60
 
-cron ${quark_time} then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-signin.js") with enable=${quark_signin}, tag="夸克签到", timeout=120
-
-cron "0 0 1 1 0" then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-diag.js") with enable=true, tag="夸克1002诊断", timeout=60
+request if ${url} ~= /pDChohbxo82nCoIn/i then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-notify.js") with enable=${quark_signin}, tag="夸克签到请求", timeout=60, requires_body=false
 
 [MITM]
 hostname = scan-order.quark.cn
