@@ -6,7 +6,7 @@
 const KEY = 'quark_scan_auth_v1';
 const SIGN_URL = 'https://scan-order.quark.cn/api/sd6hJds8SIgn/pDChohbxo82nCoIn';
 const STATUS_URL = 'https://scan-order.quark.cn/api/sd6hJds8SIgn/pOcKNmTupWelFare';
-const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X; zh-cn) AppleWebKit/601.1.46 (KHTML, like Gecko) Mobile/24B119 Quark/10.4.0.2812 Scanking/10.4.0.2812 Mobile';
+const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 27_2 like Mac OS X; zh-cn) AppleWebKit/601.1.46 (KHTML, like Gecko) Mobile/24B119 Quark/10.4.0.2812 Scanking/10.4.0.2812 Mobile';
 const REFERER = 'https://scank.quark.cn/';
 
 function randomHex(len) {
@@ -55,14 +55,14 @@ function notify(sub, body) {
     '&ve=10.4.0.2812&sv=app&ut=' + encodeURIComponent(ut) +
     (kp ? '&kp=' + encodeURIComponent(kp) : '') +
     '&fr=iphone&cg=default&pr=scanking';
-  const statusBody = { bucket: '', product: 'filter', chid: randomHex(32), token: saved.token || randomHex(32) };
+  const statusBody = { bucket: '', product: 'filter', chid: randomHex(32), token: randomHex(32) };
 
   post(STATUS_URL + statusQ, statusBody, cookie, function (err1, resp1, data1) {
     if (err1 || !data1) { notify('网络错误', '状态查询失败：' + (err1 || '空响应')); return; }
     let st = {};
     try { st = JSON.parse(data1); } catch (e) {}
     if (st.code !== 0) {
-      notify('凭证已失效', '请打开夸克扫描王 App 进一次签到页重新抓取');
+      notify('状态查询被拒', String(data1).slice(0, 140));
       return;
     }
     // 已签判断：今天这一格 signed=true 则跳过
@@ -104,8 +104,7 @@ function notify(sub, body) {
           // token 每次随机生成即可，不回写
         }
       } else {
-        notify('签到失败', 'code=' + (r.code !== undefined ? r.code : (resp2 ? resp2.status : '?')) + '，msg=' + (r.msg || data2.slice(0, 80)) +
-          '；若多次失败请打开 App 刷新凭证');
+        notify('签到失败', String(data2).slice(0, 140));
       }
       $done();
     });
