@@ -47,7 +47,9 @@ function decodeBody(body) {
 
     $persistentStore.write(JSON.stringify(saved), KEY);
     console.log('[夸克签到] 凭证已保存: cookie=' + (cookie ? 'ok' : '无') + ' ut=' + (ut ? 'ok' : '无') + ' token=' + (token ? 'ok' : '无'));
-    $notification.notify('夸克扫描王', '凭证抓取成功', '自动签到已就绪' + (cookie && ut ? '' : '（凭证不全，多进几次签到页）'));
+    const t = '夸克扫描王';
+    if ($notification && typeof $notification.post === 'function') $notification.post(t, '凭证抓取成功', '自动签到已就绪' + (cookie && ut ? '' : '（凭证不全，多进几次签到页）'));
+    else if ($notification && typeof $notification.notify === 'function') $notification.notify(t, '凭证抓取成功', '自动签到已就绪');
   } catch (e) {
     console.log('[夸克签到] 抓取异常: ' + e);
   }

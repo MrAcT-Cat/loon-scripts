@@ -31,7 +31,10 @@ function post(url, bodyObj, cookie, cb) {
 }
 
 function notify(sub, body) {
-  $notification.notify('夸克扫描王自动签到', sub, body);
+  const t = '夸克扫描王自动签到';
+  if ($notification && typeof $notification.post === 'function') $notification.post(t, sub, body);
+  else if ($notification && typeof $notification.notify === 'function') $notification.notify(t, sub, body);
+  else console.log('[夸克签到] ' + sub + ' ' + body);
   $done();
 }
 
