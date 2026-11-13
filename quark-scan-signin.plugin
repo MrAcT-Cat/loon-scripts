@@ -1,0 +1,14 @@
+#!name = 夸克扫描王自动签到
+#!desc = 抓取夸克扫描王 Cookie/凭证并每日自动签到；首次使用请打开 App 进一次签到页；Cookie 失效后重新进一次即可
+#!author = Scripting Agent
+#!tag = 签到
+#!date = 2026-11-13
+
+[Script]
+// 凭证抓取：访问签到相关接口时保存 Cookie 与 ut/kp/token
+ScanKingCookie = type=http-request, pattern=https?:\/\/scan-order\.quark\.cn\/api\/, requires-body=true, max-size=0, script-path=quark-scan-cookie.js, timeout=10
+// 每日 09:35 自动签到（想改时间就改 cronexp）
+ScanKingSignIn = type=cron, cronexp=35 9 * * *, script-path=quark-scan-signin.js, timeout=60, enable=true
+
+[MITM]
+hostname = %APPEND% scan-order.quark.cn
