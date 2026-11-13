@@ -9,7 +9,7 @@ quark_cookie = switch,true,tag=夸克Cookie抓取
 quark_time = input,"35 9 * * *",tag=签到定时
 
 [Script]
-request if ${url} ~= /scan-order\.quark\.cn/i then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-cookie.js") with enable=${quark_cookie}, tag="夸克Cookie", timeout=60, requires_body=false
+request if ${url} ~= /(scan-order|drive-m)\.quark\.cn/i then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-cookie.js") with enable=${quark_cookie}, tag="夸克Cookie", timeout=60, requires_body=false
 
 cron ${quark_time} then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-signin.js") with enable=${quark_signin}, tag="夸克签到", timeout=120
 
