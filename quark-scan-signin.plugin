@@ -6,9 +6,9 @@
 
 [Script]
 // 凭证抓取：访问签到相关接口时保存 Cookie 与 ut/kp/token
-ScanKingCookie = type=http-request, pattern=https?:\/\/scan-order\.quark\.cn\/api\/, requires-body=true, max-size=0, script-path=quark-scan-cookie.js, timeout=10
+ScanKingCookie = type=http-request, pattern=https?:\/\/scan-order\.quark\.cn\/api\/, requires-body=true, max-size=0, script-path=https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-cookie.js, timeout=10
 // 每日 09:35 自动签到（想改时间就改 cronexp）
-ScanKingSignIn = type=cron, cronexp=35 9 * * *, script-path=quark-scan-signin.js, timeout=60, enable=true
+ScanKingSignIn = type=cron, cronexp=35 9 * * *, script-path=https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-signin.js, timeout=60, enable=true
 
 [MITM]
 hostname = %APPEND% scan-order.quark.cn
