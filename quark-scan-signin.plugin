@@ -14,4 +14,4 @@ request if ${url} ~= /scan-order\.quark\.cn/i then script("https://raw.githubuse
 cron ${quark_time} then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-signin.js") with enable=${quark_signin}, tag="夸克签到", timeout=120
 
 [MITM]
-hostname = %APPEND% scan-order.quark.cn
+hostname = scan-order.quark.cn
