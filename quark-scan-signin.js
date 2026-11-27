@@ -55,10 +55,16 @@ function finish(sub, body) {
     finish('凭证不完整', '缺少 bucket，请重新打开签到页并停留几秒后再试');
     return;
   }
+  if (!saved.pc || !saved.os) {
+    finish('凭证不完整', '缺少 pc/os，请重新打开签到页并停留几秒后再试');
+    return;
+  }
   const cookie = saved.cookie;
   const ut = saved.ut;
   const kp = saved.kp;
   const bucket = saved.bucket;
+  const os = saved.os;
+  const pc = saved.pc;
 
   // 本机当日去重：今天已成功签到就不再重复请求
   let last = '';
@@ -73,7 +79,9 @@ function finish(sub, body) {
   const statusQ = '?uc_param_str=vesvutkpfrcgprospc&timestamp=' + ts +
     '&ve=10.4.0.2812&sv=app&ut=' + encodeURIComponent(ut) +
     '&kp=' + encodeURIComponent(kp) +
-    '&fr=iphone&cg=default&pr=scanking';
+    '&fr=iphone&cg=default&pr=scanking' +
+    '&os=' + encodeURIComponent(os) +
+    '&pc=' + encodeURIComponent(pc);
   const statusBody = { bucket: '', product: 'filter', chid: randomHex(32), token: randomHex(32) };
   const statusHeaders = {
     'Content-Type': 'application/json',
