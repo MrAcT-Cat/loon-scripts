@@ -14,9 +14,9 @@ quark_notify_enable = switch,true,tag=结果通知,desc=签到结果与凭证抓
 # 抓取凭证：bucket/kp/ut 来自请求体，cookie 来自请求头；需完整请求体
 request if ${url} ~= /^https:\/\/scan-order\.quark\.cn\//i then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-cookie.js?v=20261127-6") with enable=${quark_capture_enable}, requires_body=true, timeout=20, tag="夸克获取凭证"
 # 定时签到
-cron ${quark_cron} then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-signin.js?v=20261127-6") with enable=${quark_sign_enable}, timeout=60, tag="夸克每日签到"
+cron ${quark_cron} then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-signin.js?v=20261127-7") with enable=${quark_sign_enable}, timeout=60, tag="夸克每日签到"
 # 手动测试签到
-generic then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-signin.js?v=20261127-6") with timeout=60, tag="夸克手动签到"
+generic then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-signin.js?v=20261127-7") with timeout=60, tag="夸克手动签到"
 # App 手动签到结果提醒（需要完整响应体）
 response if ${url} ~= /^https:\/\/scan-order\.quark\.cn\/api\/sd6hJds8SIgn\/pDChohbxo82nCoIn(?:\?|$)/i then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-notify.js?v=20261127-2") with enable=${quark_notify_enable}, timeout=20, requires_body=true, tag="夸克签到结果"
 
