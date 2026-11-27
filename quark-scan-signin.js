@@ -7,6 +7,7 @@
  */
 const KEY = 'quark_scan_auth_v1';
 const LAST_KEY = 'quark_scan_last_sign_v1';
+const VER = 'v6';
 const SIGN_URL = 'https://scan-order.quark.cn/api/sd6hJds8SIgn/pDChohbxo82nCoIn';
 const STATUS_URL = 'https://scan-order.quark.cn/api/sd6hJds8SIgn/pOcKNmTupWelFare';
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 27_2 like Mac OS X; zh-cn) AppleWebKit/601.1.46 (KHTML, like Gecko) Mobile/24B119 Quark/10.4.0.2812 Scanking/10.4.0.2812 Mobile';
@@ -35,7 +36,7 @@ function post(url, headers, bodyObj, cb) {
 
 function finish(sub, body) {
   const t = '夸克扫描王自动签到';
-  if ($notification && typeof $notification.post === 'function') $notification.post(t, sub, body);
+  if ($notification && typeof $notification.post === 'function') $notification.post(t, sub + '（' + VER + '）', body);
   else console.log('[夸克签到] ' + sub + ' ' + body);
   $done();
 }
