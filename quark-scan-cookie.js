@@ -1,7 +1,7 @@
 /**
  * 夸克扫描王 - 凭证抓取 (Loon request 脚本)
- * 匹配 scan-order.quark.cn 任意请求，保存 Cookie + ut + kp + bucket 到持久化存储
- * 版本: 2026-11-27.r4 —— 增加 bucket 捕获（签到 body 必需）
+ * 匹配 scan-order.quark.cn 任意请求，保存 Cookie + ut + kp + bucket + os + pc 到持久化存储
+ * 版本: 2026-11-27.r5 —— 增加 bucket/os/pc 捕获（状态查询 query 必需）
  */
 const KEY = 'quark_scan_auth_v1';
 const THROTTLE_KEY = 'quark_scan_notify_at';
@@ -25,6 +25,8 @@ function pickIn(source, field) {
     const ut = pickIn(reqUrl, 'ut') || pickIn(body, 'ut');
     const kp = pickIn(reqUrl, 'kp') || pickIn(body, 'kp');
     const bucket = pickIn(body, 'bucket') || pickIn(reqUrl, 'bucket');
+    const os = pickIn(reqUrl, 'os') || pickIn(body, 'os');
+    const pc = pickIn(reqUrl, 'pc') || pickIn(body, 'pc');
 
     console.log('[夸克签到] 拦截: ' + reqUrl.split('?')[0]);
     console.log('[夸克签到] cookie=' + (cookie ? cookie.length + 'B' : '无') + ' ut=' + (ut ? 'ok' : '无') + ' kp=' + (kp ? 'ok' : '无') + ' bucket=' + (bucket ? 'ok' : '无'));
@@ -34,11 +36,13 @@ function pickIn(source, field) {
     let saved = {};
     try { saved = JSON.parse($persistentStore.read(KEY) || '{}'); } catch (e) {}
 
-    const changed = (cookie && cookie !== saved.cookie) || (ut && ut !== saved.ut) || (kp && kp !== saved.kp) || (bucket && bucket !== saved.bucket);
+    const changed = (cookie && cookie !== saved.cookie) || (ut && ut !== saved.ut) || (kp && kp !== saved.kp) || (bucket && bucket !== saved.bucket) || (os && os !== saved.os) || (pc && pc !== saved.pc);
     if (cookie) saved.cookie = cookie;
     if (ut) saved.ut = decodeURIComponent(ut);
     if (kp) saved.kp = decodeURIComponent(kp);
     if (bucket) saved.bucket = bucket;
+    if (os) saved.os = os;
+    if (pc) saved.pc = decodeURIComponent(pc);
     saved.updatedAt = Date.now();
     $persistentStore.write(JSON.stringify(saved), KEY);
 
