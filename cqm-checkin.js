@@ -6,8 +6,20 @@
   const BASE = 'https://wk.cqm.lol';
   const KEY = 'cqm.loon.credentials.v1';
   const capture = typeof $request !== 'undefined';
-  function notify(text) {
+  let settings = {};
+  if (typeof $argument !== 'undefined' && $argument != null) {
+    try {
+      const value = typeof $argument === 'string' ? JSON.parse($argument) : $argument;
+      if (value && typeof value === 'object' && !Array.isArray(value)) settings = value;
+    } catch (_) { console.log('[穿墙猫] 参数无法识别，使用默认设置'); }
+  }
+  function enabled(name) {
+    return settings[name] !== false && settings[name] !== 'false';
+  }
+  function notify(text, category) {
     console.log('[穿墙猫] ' + text);
+    if (!enabled('notify_enable')) return;
+    if (category === 'already' && !enabled('notify_already')) return;
     $notification.post('穿墙猫签到', '', text);
   }
   function header(headers, name) {
@@ -69,7 +81,7 @@
     }
     const state = validate(await api('get', 'status'));
     if (!state.enabled) throw new Error('网站暂未开放签到。');
-    if (state.checked_today) { notify('今天已经签到，无需重复提交。'); return; }
+    if (state.checked_today) { notify('今天已经签到，无需重复提交。', 'already'); return; }
     if (state.subscribe_valid !== true) throw new Error('订阅不满足签到条件，请到网页查看。');
     const result = await api('post', 'do');
     const after = validate(await api('get', 'status'));
