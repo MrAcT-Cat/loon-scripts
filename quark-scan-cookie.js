@@ -1,7 +1,7 @@
 /**
  * 夸克扫描王 - 凭证抓取 (Loon request 脚本)
- * 匹配 scan-order.quark.cn 任意请求，保存 Cookie + ut + kp 到持久化存储
- * 版本: 2026-11-13.r3 —— 不依赖请求体；60 秒节流防通知轰炸
+ * 匹配 scan-order.quark.cn 任意请求，保存 Cookie + ut + kp + bucket 到持久化存储
+ * 版本: 2026-11-27.r4 —— 增加 bucket 捕获（签到 body 必需）
  */
 const KEY = 'quark_scan_auth_v1';
 const THROTTLE_KEY = 'quark_scan_notify_at';
@@ -24,19 +24,21 @@ function pickIn(source, field) {
 
     const ut = pickIn(reqUrl, 'ut') || pickIn(body, 'ut');
     const kp = pickIn(reqUrl, 'kp') || pickIn(body, 'kp');
+    const bucket = pickIn(body, 'bucket') || pickIn(reqUrl, 'bucket');
 
     console.log('[夸克签到] 拦截: ' + reqUrl.split('?')[0]);
-    console.log('[夸克签到] cookie=' + (cookie ? cookie.length + 'B' : '无') + ' ut=' + (ut ? 'ok' : '无') + ' kp=' + (kp ? 'ok' : '无'));
+    console.log('[夸克签到] cookie=' + (cookie ? cookie.length + 'B' : '无') + ' ut=' + (ut ? 'ok' : '无') + ' kp=' + (kp ? 'ok' : '无') + ' bucket=' + (bucket ? 'ok' : '无'));
 
     if (!cookie && !ut) { $done({}); return; }
 
     let saved = {};
     try { saved = JSON.parse($persistentStore.read(KEY) || '{}'); } catch (e) {}
 
-    const changed = (cookie && cookie !== saved.cookie) || (ut && ut !== saved.ut) || (kp && kp !== saved.kp);
+    const changed = (cookie && cookie !== saved.cookie) || (ut && ut !== saved.ut) || (kp && kp !== saved.kp) || (bucket && bucket !== saved.bucket);
     if (cookie) saved.cookie = cookie;
     if (ut) saved.ut = decodeURIComponent(ut);
     if (kp) saved.kp = decodeURIComponent(kp);
+    if (bucket) saved.bucket = bucket;
     saved.updatedAt = Date.now();
     $persistentStore.write(JSON.stringify(saved), KEY);
 
@@ -47,10 +49,10 @@ function pickIn(source, field) {
     if (Date.now() - lastNotify < THROTTLE_MS) { $done({}); return; }
     $persistentStore.write(String(Date.now()), THROTTLE_KEY);
 
-    const full = cookie && ut;
+    const full = cookie && ut && kp && bucket;
     $notification.post('夸克扫描王', '凭证抓取' + (full ? '成功 ✅' : '部分成功'), full
       ? '自动签到已就绪，明天早上见'
-      : 'Cookie=' + (cookie ? '有' : '无') + ' ut=' + (ut ? '有' : '无') + '，请在签到页多停留几秒');
+      : 'Cookie=' + (cookie ? '有' : '无') + ' ut=' + (ut ? '有' : '无') + ' kp=' + (kp ? '有' : '无') + ' bucket=' + (bucket ? '有' : '无') + '，请在签到页多停留几秒');
   } catch (e) {
     console.log('[夸克签到] 抓取异常: ' + e);
     try { $notification.post('夸克扫描王', '抓取脚本异常', String(e)); } catch (e2) {}
