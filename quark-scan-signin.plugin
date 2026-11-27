@@ -1,15 +1,14 @@
-#!name = 夸克扫描王自动签到
-#!desc = 配合 iOS 快捷指令每日自动打开 App；App 原生自动签到，Loon 拦截真实响应并推送结果通知（不伪造任何请求）
-#!date = 2026-11-13
+#!name = 夸克扫描王签到结果提醒
+#!desc = 本插件不主动签到：需手动或通过快捷指令打开夸克扫描王签到页，由 App 发起签到。Loon 读取真实响应后提醒；仅打开 App 是否签到由 App 行为决定，不保证后台自动签到。
+#!date = 2026-11-27
+#!loon_version = 3.5.1(983)
 #!author = Scripting Agent
 
 [Argument]
-quark_signin = switch,true,tag=签到结果播报
+quark_signin = switch,true,tag=签到结果播报,desc=监听 App 真实签到响应并通知；此开关不会创建定时签到任务
 
 [Script]
-response if ${url} ~= /pDChohbxo82nCoIn/i then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-notify.js") with enable=${quark_signin}, tag="夸克签到结果", timeout=60
-
-request if ${url} ~= /pDChohbxo82nCoIn/i then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-notify.js") with enable=${quark_signin}, tag="夸克签到请求", timeout=60, requires_body=false
+response if ${url} ~= /^https:\/\/scan-order\.quark\.cn\/api\/sd6hJds8SIgn\/pDChohbxo82nCoIn(?:\?|$)/i then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-notify.js?v=20261127-2") with enable=${quark_signin}, tag="夸克签到结果", timeout=20, requires_body=true
 
 [MITM]
 hostname = scan-order.quark.cn
