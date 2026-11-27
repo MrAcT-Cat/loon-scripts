@@ -1,14 +1,24 @@
-#!name = 夸克扫描王签到结果提醒
-#!desc = 本插件不主动签到：需手动或通过快捷指令打开夸克扫描王签到页，由 App 发起签到。Loon 读取真实响应后提醒；仅打开 App 是否签到由 App 行为决定，不保证后台自动签到。
+#!name = 夸克扫描王签到
+#!desc = 打开签到页抓取 Cookie/ut/kp/bucket，每天定时自动签到；App 手动签到也会推送结果。凭证失效或参数校验失败时需重新打开签到页。每日签到端点可能仍需真机确认。
 #!date = 2026-11-27
 #!loon_version = 3.5.1(983)
 #!author = Scripting Agent
 
 [Argument]
-quark_signin = switch,true,tag=签到结果播报,desc=监听 App 真实签到响应并通知；此开关不会创建定时签到任务
+quark_sign_enable = switch,true,tag=自动签到,desc=每天定时签到；关闭后仍可手动测试
+quark_capture_enable = switch,true,tag=获取凭证,desc=打开签到页时保存 Cookie/ut/kp/bucket；获取完成后可关闭
+quark_cron = input,"5 8 * * *",type=string,tag=签到时间,desc=Cron 表达式，默认每天 08:05；例如 0 9 * * * 为每天 09:00
+quark_notify_enable = switch,true,tag=结果通知,desc=签到结果与凭证抓取通知
 
 [Script]
-response if ${url} ~= /^https:\/\/scan-order\.quark\.cn\/api\/sd6hJds8SIgn\/pDChohbxo82nCoIn(?:\?|$)/i then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-notify.js?v=20261127-2") with enable=${quark_signin}, tag="夸克签到结果", timeout=20, requires_body=true
+# 抓取凭证：bucket/kp/ut 来自请求体，cookie 来自请求头；需完整请求体
+request if ${url} ~= /^https:\/\/scan-order\.quark\.cn\//i then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-cookie.js?v=20261127-4") with enable=${quark_capture_enable}, requires_body=true, timeout=20, tag="夸克获取凭证"
+# 定时签到
+cron ${quark_cron} then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-signin.js?v=20261127-4") with enable=${quark_sign_enable}, timeout=60, tag="夸克每日签到"
+# 手动测试签到
+generic then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-signin.js?v=20261127-4") with timeout=60, tag="夸克手动签到"
+# App 手动签到结果提醒（需要完整响应体）
+response if ${url} ~= /^https:\/\/scan-order\.quark\.cn\/api\/sd6hJds8SIgn\/pDChohbxo82nCoIn(?:\?|$)/i then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/quark-scan-notify.js?v=20261127-2") with enable=${quark_notify_enable}, timeout=20, requires_body=true, tag="夸克签到结果"
 
 [MITM]
 hostname = scan-order.quark.cn
