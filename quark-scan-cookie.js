@@ -4,6 +4,7 @@
  * 版本: 2026-11-27.r5 —— 增加 bucket/os/pc 捕获（状态查询 query 必需）
  */
 const KEY = 'quark_scan_auth_v1';
+const VER = 'v6';
 const THROTTLE_KEY = 'quark_scan_notify_at';
 const THROTTLE_MS = 60 * 1000;
 
@@ -54,7 +55,7 @@ function pickIn(source, field) {
     $persistentStore.write(String(Date.now()), THROTTLE_KEY);
 
     const full = cookie && ut && kp && bucket;
-    $notification.post('夸克扫描王', '凭证抓取' + (full ? '成功 ✅' : '部分成功'), full
+    $notification.post('夸克扫描王', '凭证抓取' + (full ? '成功 ✅' : '部分成功') + '（' + VER + '）', full
       ? '自动签到已就绪，明天早上见'
       : 'Cookie=' + (cookie ? '有' : '无') + ' ut=' + (ut ? '有' : '无') + ' kp=' + (kp ? '有' : '无') + ' bucket=' + (bucket ? '有' : '无') + '，请在签到页多停留几秒');
   } catch (e) {
