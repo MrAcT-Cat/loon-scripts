@@ -1,19 +1,30 @@
-#!name = 穿墙猫每日签到
-#!desc = 可在插件设置调整自动签到、凭据获取、签到时间和通知。默认每天 08:05；首次 Safari 登录并刷新仪表盘获取凭据。关闭自动签到不影响手动测试。验证失效时需打开网站验证并刷新。
-#!date = 2026-11-27
+#!name = 穿墙猫 + 星驰 每日签到
+#!desc = 统一签到：穿墙猫（wk.cqm.lol）+ 星驰API（xingchiapi.com）。首次在 Safari 登录对应网站获取凭证；每天定时自动签到，token 过期自动续期。验证失效时需重新登录。
+#!date = 2026-11-28
 #!loon_version = 3.5.1(983)
 
 [Argument]
-checkin_enable = switch,true,tag=自动签到,desc=控制定时任务；关闭后仍可手动测试
-capture_enable = switch,true,tag=获取登录凭据,desc=打开网站仪表盘时保存或更新凭据；获取完成后可关闭
-checkin_cron = input,"5 8 * * *",type=string,tag=签到时间,desc=Cron 表达式，默认每天 08:05；例如 0 9 * * * 为每天 09:00
-notify_enable = switch,true,tag=结果通知,desc=控制签到结果、凭据获取及失败提醒；关闭后仍执行并保留日志
-notify_already = switch,true,tag=已签到通知,desc=今天已签到时也发通知；需同时开启结果通知
+# 穿墙猫
+checkin_enable = switch,true,tag=穿墙猫自动签到,desc=控制穿墙猫定时签到
+capture_enable = switch,true,tag=穿墙猫获取凭据,desc=打开仪表盘时保存穿墙猫凭据
+checkin_cron = input,"5 8 * * *",type=string,tag=穿墙猫签到时间,desc=Cron 表达式，默认每天 08:05
+notify_enable = switch,true,tag=穿墙猫结果通知
+notify_already = switch,true,tag=穿墙猫已签到通知
+# 星驰
+xingchi_enable = switch,true,tag=星驰自动签到,desc=控制星驰定时签到
+xingchi_capture_enable = switch,true,tag=星驰获取凭据,desc=登录/刷新时自动保存星驰 token
+xingchi_cron = input,"10 8 * * *",type=string,tag=星驰签到时间,desc=Cron 表达式，默认每天 08:10
 
 [Script]
+# 穿墙猫：抓凭据 + 定时签到 + 手动测试
 request if ${url} ~= /^https:\/\/wk\.cqm\.lol\/api\/v1\/user\/checkin\/status(?:\?|$)/i then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/cqm-checkin.js?v=20261127-2", {${notify_enable}, ${notify_already}}) with enable=${capture_enable}, requires_body=false, timeout=10, tag="穿墙猫获取凭据"
 cron ${checkin_cron} then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/cqm-checkin.js?v=20261127-2", {${notify_enable}, ${notify_already}}) with enable=${checkin_enable}, timeout=60, tag="穿墙猫每日签到"
 generic then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/cqm-checkin.js?v=20261127-2", {${notify_enable}, ${notify_already}}) with timeout=60, tag="穿墙猫手动测试"
 
+# 星驰：抓 token（登录/刷新响应）+ 定时签到 + 手动测试
+response if ${url} ~= /^https:\/\/xingchiapi\.com\/api\/v1\/auth\/(login|refresh)$/i then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/xingchi-checkin.js?v=20261128") with enable=${xingchi_capture_enable}, requires_body=true, timeout=20, tag="星驰获取凭证"
+cron ${xingchi_cron} then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/xingchi-checkin.js?v=20261128") with enable=${xingchi_enable}, timeout=60, tag="星驰每日签到"
+generic then script("https://raw.githubusercontent.com/MrAcT-Cat/loon-scripts/main/xingchi-checkin.js?v=20261128") with timeout=60, tag="星驰手动测试"
+
 [MITM]
-hostname = wk.cqm.lol
+hostname = wk.cqm.lol,xingchiapi.com
